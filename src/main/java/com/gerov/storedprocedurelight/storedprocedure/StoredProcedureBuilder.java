@@ -1,4 +1,4 @@
-package com.gerov.storedprocedurelight.builders;
+package com.gerov.storedprocedurelight.storedprocedure;
 
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;

@@ -1,4 +1,4 @@
-package com.gerov.storedprocedurelight;
+package com.gerov.storedprocedurelight.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

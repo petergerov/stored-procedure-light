@@ -1,6 +1,6 @@
 package com.gerov.storedprocedurelight.service;
 
-import com.gerov.storedprocedurelight.builders.StoredProcedureBuilder;
+import com.gerov.storedprocedurelight.storedprocedure.StoredProcedureBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
