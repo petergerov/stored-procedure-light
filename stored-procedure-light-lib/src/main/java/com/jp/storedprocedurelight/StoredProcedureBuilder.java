@@ -1,4 +1,4 @@
-package com.jp.storedprocedurelight.storedprocedure;
+package com.jp.storedprocedurelight;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlInOutParameter;

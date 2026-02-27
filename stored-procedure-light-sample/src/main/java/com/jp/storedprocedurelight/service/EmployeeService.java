@@ -1,7 +1,7 @@
 package com.jp.storedprocedurelight.service;
 
 import com.jp.storedprocedurelight.dto.EmployeeAttributesDto;
-import com.jp.storedprocedurelight.storedprocedure.StoredProcedureBuilder;
+import com.jp.storedprocedurelight.StoredProcedureBuilder;
 import com.jp.storedprocedurelight.transformer.ClobTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
