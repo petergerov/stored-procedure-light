@@ -14,16 +14,16 @@ import java.util.Map;
 @RequestMapping("/employees")
 public class EmployeeController {
 
- @Autowired
- private EmployeeService employeeService;
+    @Autowired
+    private EmployeeService employeeService;
 
- @GetMapping("/{id}")
- public ResponseEntity<Map<String, Object>> getEmployee(@PathVariable Long id) {
- Map<String, Object> result = employeeService.getEmployeeDetails(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> getEmployee(@PathVariable Long id) {
+        Map<String, Object> result = employeeService.getEmployeeDetails(id);
 
- return ResponseEntity.ok(Map.of(
-                 "name", result.get("p_name"),
-                 "salary", result.get("p_salary")
-                 ));
- }
+        return ResponseEntity.ok(Map.of(
+                "name", result.get("p_name"),
+                "salary", result.get("p_salary")
+        ));
+    }
 }
