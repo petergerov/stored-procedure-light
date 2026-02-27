@@ -4,9 +4,18 @@ A Spring Boot reference project demonstrating a fluent builder API for calling s
 
 ---
 
+## Modules
+
+| Module | Description |
+|---|---|
+| `stored-procedure-light-lib` | Reusable library: `StoredProcedureBuilder` + `ClobTransformer` |
+| `stored-procedure-light-sample` | Spring Boot application that uses the library |
+
+---
+
 ## How it works
 
-A single concrete `StoredProcedureBuilder` wraps Spring's `SimpleJdbcCall` and exposes a fluent API for all Oracle parameter modes.
+A single concrete `StoredProcedureBuilder` (in the lib module) wraps Spring's `SimpleJdbcCall` and exposes a fluent API for all Oracle parameter modes.
 
 ### Example — `GET_EMP_DETAILS`
 
@@ -48,24 +57,32 @@ return new StoredProcedureBuilder(jdbcTemplate, "APPLY_RAISE")
 ## Project structure
 
 ```
-src/main/java/com/gerov/storedprocedurelight/
-├── storedprocedure/
-│   └── StoredProcedureBuilder.java         # fluent builder: inParam, outParam, inOutParam, execute()
-├── transformer/
-│   └── ClobTransformer.java                # Function<Object,T>: Clob/String → T via JSON
-├── dto/
-│   └── EmployeeAttributesDto.java          # example CLOB payload (Lombok)
-├── service/
-│   └── OracleEmployeeService.java
-└── controller/
-    └── OracleEmployeeController.java       # /oracle/employees/**
-
-src/main/resources/
-├── application.properties                  # port 8090, active profile: oracle
-├── application-oracle.properties           # datasource + SQL init config
-└── db/oracle/
-    ├── schema.sql                          # DROP/CREATE TABLE + procedures
-    └── data.sql                            # seed data (MERGE INTO)
+stored-procedure-light/                     # parent POM
+├── stored-procedure-light-lib/             # library module (jar)
+│   └── src/main/java/com/jp/storedprocedurelight/
+│       ├── storedprocedure/
+│       │   └── StoredProcedureBuilder.java # fluent builder: inParam, outParam, inOutParam, execute()
+│       └── transformer/
+│           └── ClobTransformer.java        # Function<Object,T>: Clob/String → T via JSON
+└── stored-procedure-light-sample/          # Spring Boot application module
+    └── src/
+        ├── main/java/com/jp/storedprocedurelight/
+        │   ├── dto/
+        │   │   └── EmployeeAttributesDto.java   # example CLOB payload (Lombok)
+        │   ├── service/
+        │   │   └── EmployeeService.java
+        │   └── controller/
+        │       └── EmployeeController.java      # /oracle/employees/**
+        └── main/resources/
+            ├── application.properties           # port 8090, active profile: oracle
+            ├── application-oracle.properties    # datasource + SQL init config
+            ├── oracle/
+            │   ├── schema.sql                   # DROP/CREATE TABLE + procedures
+            │   ├── data.sql                     # seed data (MERGE INTO)
+            │   └── sp_call.sql                  # utility script to test procedures in Oracle
+            └── oracle_install/
+                ├── create_user.sql              # create TEST schema user + grant permissions
+                └── install_oracle_docker.txt    # docker setup notes
 ```
 
 ---
@@ -100,11 +117,24 @@ src/main/resources/
 | `GET` | `/oracle/employees/{id}` | Fetch employee details |
 | `GET` | `/oracle/employees/{id}/raise/{pct}` | Apply raise and return new salary |
 
-**Sample response:**
+**Sample response — `/oracle/employees/1`:**
 ```json
 {
   "name": "Alice",
   "salary": 75000.0,
+  "attributes": {
+    "department": "Engineering",
+    "level": "Senior",
+    "skills": ["Java", "Spring"]
+  }
+}
+```
+
+**Sample response — `/oracle/employees/1/raise/10`:**
+```json
+{
+  "name": "Alice",
+  "newSalary": 82500.0,
   "attributes": {
     "department": "Engineering",
     "level": "Senior",
@@ -120,7 +150,7 @@ src/main/resources/
 ### 1. Start Oracle 23c Free
 
 ```bash
-docker login container-registry.oracle.com   # requires a free Oracle account
+docker login container-registry.oracle.com   # requires a free Oracle account + AuthToken (since 05.2025)
 
 docker run -d \
   --name oracle-free \
@@ -129,12 +159,20 @@ docker run -d \
   container-registry.oracle.com/database/free:latest-lite
 ```
 
-Create the `TEST` schema user — see `src/main/resources/db/oracle/create_user.sql`.
+Create the `TEST` schema user — run `stored-procedure-light-sample/src/main/resources/oracle_install/create_user.sql` as `SYS` or `SYSDBA` inside `FREEPDB1`.
 
-### 2. Start the application
+### 2. Build and run
 
 ```bash
-mvn spring-boot:run
+mvn install -pl stored-procedure-light-lib
+mvn spring-boot:run -pl stored-procedure-light-sample
+```
+
+Or build everything from the root and run the sample:
+
+```bash
+mvn install
+mvn spring-boot:run -pl stored-procedure-light-sample
 ```
 
 The app connects to `jdbc:oracle:thin:@//localhost:1521/FREEPDB1` as `TEST`, runs `schema.sql` + `data.sql` on every startup, and listens on **`http://localhost:8090`**.
