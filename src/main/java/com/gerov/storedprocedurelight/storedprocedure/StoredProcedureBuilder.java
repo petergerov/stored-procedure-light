@@ -1,67 +1,75 @@
 package com.gerov.storedprocedurelight.storedprocedure;
 
-import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 
-public class StoredProcedureBuilder {
+/**
+ * Abstract base for stored-procedure builders.
+ * Holds the fields and methods common to all database dialects:
+ * input parameters and output transformers.
+ *
+ * @param <B> the concrete builder type (CRTP), enabling fluent chaining on subclasses
+ */
+public abstract class StoredProcedureBuilder<B extends StoredProcedureBuilder<B>> {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final String procedureName;
-    private final MapSqlParameterSource inParams = new MapSqlParameterSource();
-    private final Map<String, SqlParameter> declaredParams = new LinkedHashMap<>();
+    protected final JdbcTemplate jdbcTemplate;
+    protected final String procedureName;
+    protected final MapSqlParameterSource inParams = new MapSqlParameterSource();
+    protected final Map<String, SqlParameter> declaredParams = new LinkedHashMap<>();
+    protected final Map<String, Function<Object, Object>> transformers = new LinkedHashMap<>();
 
-    public StoredProcedureBuilder(JdbcTemplate jdbcTemplate, String procedureName) {
+    protected StoredProcedureBuilder(JdbcTemplate jdbcTemplate, String procedureName) {
         this.jdbcTemplate = jdbcTemplate;
         this.procedureName = procedureName;
     }
 
-    public StoredProcedureBuilder inParam(String name, int sqlType, Object value) {
+    @SuppressWarnings("unchecked")
+    protected final B self() {
+        return (B) this;
+    }
+
+    // ── Input parameters ──────────────────────────────────────────────────────
+
+    public B inParam(String name, int sqlType, Object value) {
         declaredParams.put(name, new SqlParameter(name, sqlType));
         inParams.addValue(name, value);
-        return this;
+        return self();
     }
 
-    public StoredProcedureBuilder outParam(String name, int sqlType) {
-        declaredParams.put(name, new SqlOutParameter(name, sqlType));
-        return this;
-    }
-
-    /** For databases with native OUT parameters (e.g. Oracle). */
-    public Map<String, Object> execute() {
-        SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
-                .withProcedureName(procedureName)
-                .withoutProcedureColumnMetaDataAccess();
-        call.declareParameters(declaredParams.values().toArray(new SqlParameter[0]));
-        return call.execute(inParams);
-    }
+    // ── Transformers ──────────────────────────────────────────────────────────
 
     /**
-     * For H2 (and other databases) where the procedure returns a ResultSet
-     * instead of OUT parameters.  The first row of the result set is returned
-     * as a flat map keyed by column name.
+     * Registers a post-execution transformer for a named output value.
+     * Can be used for OUT parameters or result-set columns.
      *
-     * @param rsName logical name used internally by SimpleJdbcCall
+     * <pre>
+     * .transform("p_name",   v -> v.toString().trim())
+     * .transform("p_salary", v -> ((Number) v).doubleValue())
+     * </pre>
      */
-    public Map<String, Object> executeReturningResultSet(String rsName) {
-        SimpleJdbcCall call = new SimpleJdbcCall(jdbcTemplate)
-                .withProcedureName(procedureName)
-                .withoutProcedureColumnMetaDataAccess()
-                .returningResultSet(rsName, new ColumnMapRowMapper());
-        call.declareParameters(declaredParams.values().toArray(new SqlParameter[0]));
+    @SuppressWarnings("unchecked")
+    public B transform(String name, Function<Object, ?> transformer) {
+        transformers.put(name, (Function<Object, Object>) transformer);
+        return self();
+    }
 
-        Map<String, Object> result = call.execute(inParams);
+    // ── Internal ──────────────────────────────────────────────────────────────
 
-        @SuppressWarnings("unchecked")
-        java.util.List<Map<String, Object>> rows =
-                (java.util.List<Map<String, Object>>) result.get(rsName);
-
-        return (rows != null && !rows.isEmpty()) ? rows.get(0) : Map.of();
+    protected Map<String, Object> applyTransformers(Map<String, Object> result) {
+        if (transformers.isEmpty()) {
+            return result;
+        }
+        Map<String, Object> out = new LinkedHashMap<>(result);
+        transformers.forEach((key, fn) -> {
+            if (out.containsKey(key)) {
+                out.put(key, fn.apply(out.get(key)));
+            }
+        });
+        return out;
     }
 }
