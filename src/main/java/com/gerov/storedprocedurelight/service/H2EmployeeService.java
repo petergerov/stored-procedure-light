@@ -1,7 +1,8 @@
 package com.gerov.storedprocedurelight.service;
 
+import com.gerov.storedprocedurelight.dto.EmployeeAttributesDto;
 import com.gerov.storedprocedurelight.storedprocedure.H2StoredProcedureBuilder;
-import com.gerov.storedprocedurelight.transformer.AttributesTransformer;
+import com.gerov.storedprocedurelight.transformer.ClobTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,7 +31,7 @@ public class H2EmployeeService {
                 .inParam  ("in_emp_id",      Types.NUMERIC, empId)
                 .transform("out_name",       v -> v != null ? v.toString().trim() : null)
                 .transform("out_salary",     v -> ((Number) v).doubleValue())
-                .transform("out_attributes", new AttributesTransformer())
+                .transform("out_attributes", new ClobTransformer<>(EmployeeAttributesDto.class))
                 .execute("employee");
     }
 
@@ -44,7 +45,7 @@ public class H2EmployeeService {
                 .inParam  ("in_raise_pct",   Types.NUMERIC, raisePct)
                 .transform("out_name",       v -> v != null ? v.toString().trim() : null)
                 .transform("out_salary",     v -> ((Number) v).doubleValue())
-                .transform("out_attributes", new AttributesTransformer())
+                .transform("out_attributes", new ClobTransformer<>(EmployeeAttributesDto.class))
                 .execute("raise_result");
     }
 }

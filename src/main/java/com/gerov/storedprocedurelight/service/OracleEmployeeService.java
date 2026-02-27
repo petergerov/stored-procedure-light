@@ -1,7 +1,8 @@
 package com.gerov.storedprocedurelight.service;
 
+import com.gerov.storedprocedurelight.dto.EmployeeAttributesDto;
 import com.gerov.storedprocedurelight.storedprocedure.OracleStoredProcedureBuilder;
-import com.gerov.storedprocedurelight.transformer.AttributesTransformer;
+import com.gerov.storedprocedurelight.transformer.ClobTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class OracleEmployeeService {
                 .inParam ("in_emp_id",      Types.NUMERIC, empId)
                 .outParam("out_name",       Types.VARCHAR)
                 .outParam("out_salary",     Types.NUMERIC,  v -> ((Number) v).doubleValue())
-                .outParam("out_attributes", Types.CLOB,     new AttributesTransformer())
+                .outParam("out_attributes", Types.CLOB,     new ClobTransformer<>(EmployeeAttributesDto.class))
                 .execute();
     }
 
@@ -47,7 +48,7 @@ public class OracleEmployeeService {
                 .inParam   ("in_raise_pct",   Types.NUMERIC, raisePct)
                 .inOutParam("inout_salary",   Types.NUMERIC, 0, v -> ((Number) v).doubleValue())
                 .outParam  ("out_name",       Types.VARCHAR)
-                .outParam  ("out_attributes", Types.CLOB,    new AttributesTransformer())
+                .outParam  ("out_attributes", Types.CLOB,    new ClobTransformer<>(EmployeeAttributesDto.class))
                 .execute();
     }
 }
