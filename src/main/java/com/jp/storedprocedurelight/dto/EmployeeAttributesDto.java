@@ -1,4 +1,4 @@
-package com.gerov.storedprocedurelight.dto;
+package com.jp.storedprocedurelight.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,7 +1,7 @@
-package com.gerov.storedprocedurelight.controller;
+package com.jp.storedprocedurelight.controller;
 
-import com.gerov.storedprocedurelight.dto.EmployeeAttributesDto;
-import com.gerov.storedprocedurelight.service.OracleEmployeeService;
+import com.jp.storedprocedurelight.dto.EmployeeAttributesDto;
+import com.jp.storedprocedurelight.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,10 +14,10 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/oracle/employees")
-public class OracleEmployeeController {
+public class EmployeeController {
 
     @Autowired
-    private OracleEmployeeService employeeService;
+    private EmployeeService employeeService;
 
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getEmployee(@PathVariable Long id) {

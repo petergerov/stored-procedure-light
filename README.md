@@ -6,17 +6,12 @@ A Spring Boot reference project demonstrating a fluent builder API for calling s
 
 ## How it works
 
-The builder uses the **CRTP pattern** so every method returns the concrete subtype, keeping the call chain fully typed:
+A single concrete `StoredProcedureBuilder` wraps Spring's `SimpleJdbcCall` and exposes a fluent API for all Oracle parameter modes.
 
-```
-StoredProcedureBuilder<B>       ← abstract base: inParam, transform
-    └── OracleStoredProcedureBuilder   ← outParam, inOutParam, execute()
-```
-
-### Oracle example — `GET_EMP_DETAILS`
+### Example — `GET_EMP_DETAILS`
 
 ```java
-return new OracleStoredProcedureBuilder(jdbcTemplate, "GET_EMP_DETAILS")
+return new StoredProcedureBuilder(jdbcTemplate, "GET_EMP_DETAILS")
         .inParam ("in_emp_id",      Types.NUMERIC, empId)
         .outParam("out_name",       Types.VARCHAR)
         .outParam("out_salary",     Types.NUMERIC,  v -> ((Number) v).doubleValue())
@@ -24,10 +19,10 @@ return new OracleStoredProcedureBuilder(jdbcTemplate, "GET_EMP_DETAILS")
         .execute();
 ```
 
-### Oracle example — `APPLY_RAISE` (with `IN OUT`)
+### Example — `APPLY_RAISE` (with `IN OUT`)
 
 ```java
-return new OracleStoredProcedureBuilder(jdbcTemplate, "APPLY_RAISE")
+return new StoredProcedureBuilder(jdbcTemplate, "APPLY_RAISE")
         .inParam   ("in_emp_id",      Types.NUMERIC, empId)
         .inParam   ("in_raise_pct",   Types.NUMERIC, raisePct)
         .inOutParam("inout_salary",   Types.NUMERIC, 0, v -> ((Number) v).doubleValue())
@@ -55,8 +50,7 @@ return new OracleStoredProcedureBuilder(jdbcTemplate, "APPLY_RAISE")
 ```
 src/main/java/com/gerov/storedprocedurelight/
 ├── storedprocedure/
-│   ├── StoredProcedureBuilder.java         # abstract base (CRTP)
-│   └── OracleStoredProcedureBuilder.java   # IN / OUT / IN OUT + execute()
+│   └── StoredProcedureBuilder.java         # fluent builder: inParam, outParam, inOutParam, execute()
 ├── transformer/
 │   └── ClobTransformer.java                # Function<Object,T>: Clob/String → T via JSON
 ├── dto/

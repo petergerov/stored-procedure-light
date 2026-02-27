@@ -1,4 +1,4 @@
-package com.gerov.storedprocedurelight;
+package com.jp.storedprocedurelight;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

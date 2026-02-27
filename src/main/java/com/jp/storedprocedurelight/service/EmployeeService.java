@@ -1,8 +1,8 @@
-package com.gerov.storedprocedurelight.service;
+package com.jp.storedprocedurelight.service;
 
-import com.gerov.storedprocedurelight.dto.EmployeeAttributesDto;
-import com.gerov.storedprocedurelight.storedprocedure.OracleStoredProcedureBuilder;
-import com.gerov.storedprocedurelight.transformer.ClobTransformer;
+import com.jp.storedprocedurelight.dto.EmployeeAttributesDto;
+import com.jp.storedprocedurelight.storedprocedure.StoredProcedureBuilder;
+import com.jp.storedprocedurelight.transformer.ClobTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -11,12 +11,12 @@ import java.sql.Types;
 import java.util.Map;
 
 @Service
-public class OracleEmployeeService {
+public class EmployeeService {
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public OracleEmployeeService(JdbcTemplate jdbcTemplate) {
+    public EmployeeService(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -27,7 +27,7 @@ public class OracleEmployeeService {
      *   out_salary OUT – current salary (transformed to Double)
      */
     public Map<String, Object> getEmployeeDetails(Long empId) {
-        return new OracleStoredProcedureBuilder(jdbcTemplate, "GET_EMP_DETAILS")
+        return new StoredProcedureBuilder(jdbcTemplate, "GET_EMP_DETAILS")
                 .inParam ("in_emp_id",      Types.NUMERIC, empId)
                 .outParam("out_name",       Types.VARCHAR)
                 .outParam("out_salary",     Types.NUMERIC,  v -> ((Number) v).doubleValue())
@@ -43,7 +43,7 @@ public class OracleEmployeeService {
      *   out_name     OUT    – employee name
      */
     public Map<String, Object> applyRaise(Long empId, Double raisePct) {
-        return new OracleStoredProcedureBuilder(jdbcTemplate, "APPLY_RAISE")
+        return new StoredProcedureBuilder(jdbcTemplate, "APPLY_RAISE")
                 .inParam   ("in_emp_id",      Types.NUMERIC, empId)
                 .inParam   ("in_raise_pct",   Types.NUMERIC, raisePct)
                 .inOutParam("inout_salary",   Types.NUMERIC, 0, v -> ((Number) v).doubleValue())

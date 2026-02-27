@@ -1,4 +1,4 @@
-package com.gerov.storedprocedurelight.transformer;
+package com.jp.storedprocedurelight.transformer;
 
 import tools.jackson.databind.ObjectMapper;
 

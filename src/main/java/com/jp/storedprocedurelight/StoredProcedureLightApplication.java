@@ -1,4 +1,4 @@
-package com.gerov.storedprocedurelight;
+package com.jp.storedprocedurelight;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
