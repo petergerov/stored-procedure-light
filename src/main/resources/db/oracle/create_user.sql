@@ -1,4 +1,4 @@
-SELECT tablespace_name FROM dba_tablespaces;
+-- SELECT tablespace_name FROM dba_tablespaces;
 
 -- =========================================
 -- 1. Auf PDB wechseln (wichtig bei Oracle Free)
