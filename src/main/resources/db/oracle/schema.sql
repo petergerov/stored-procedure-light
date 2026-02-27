@@ -28,7 +28,7 @@ EXCEPTION
         out_name       := NULL;
         out_salary     := NULL;
         out_attributes := NULL;
-END GET_EMP_DETAILS
+END GET_EMP_DETAILS;
 @@
 CREATE OR REPLACE PROCEDURE APPLY_RAISE (
     in_emp_id      IN     NUMBER,
@@ -47,5 +47,5 @@ EXCEPTION
         out_name       := NULL;
         inout_salary   := NULL;
         out_attributes := NULL;
-END APPLY_RAISE
+END APPLY_RAISE;
 @@
