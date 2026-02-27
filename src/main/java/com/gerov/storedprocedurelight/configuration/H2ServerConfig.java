@@ -11,6 +11,7 @@ import java.sql.SQLException;
 @Profile("h2")
 public class H2ServerConfig {
 
+    @Profile("h2")
     @Bean(initMethod = "start", destroyMethod = "stop")
     public Server h2TcpServer() throws SQLException {
         return Server.createTcpServer("-tcp", "-tcpAllowOthers", "-tcpPort", "9092", "-ifNotExists");

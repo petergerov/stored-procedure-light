@@ -3,6 +3,7 @@ package com.gerov.storedprocedurelight.service;
 import com.gerov.storedprocedurelight.storedprocedure.H2StoredProcedureBuilder;
 import com.gerov.storedprocedurelight.transformer.AttributesTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import java.sql.Types;
 import java.util.Map;
 
 @Service
+@Profile("h2")
 public class H2EmployeeService {
 
     private final JdbcTemplate jdbcTemplate;
